@@ -47,14 +47,16 @@ pipeline TreesPipeline {
  }
 
 
- 
+//  constaints part:
+
  valuetype StadtteilConstraint oftype text {
     constraints: [ StadtteilFurth ];
  }
  
 
 constraint StadtteilFurth on text :
- value matches  /^Furth.*/;
+ value matches  /^Furth\-.*$/;
+//  value matches  /^Furth.*/;
 
 valuetype IdConstraint oftype text {
     constraints: [ IdFormats ];
