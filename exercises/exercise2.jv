@@ -29,7 +29,7 @@ pipeline TreesPipeline {
      
           
                 "lfd_nr" oftype integer,
-                "stadtteil" oftype stadtteilConstraint,
+                "stadtteil" oftype StadtteilConstraint,
                 "standort" oftype text,
                 "baumart_botanisch" oftype text,
                 "baumart_deutsch" oftype text,
