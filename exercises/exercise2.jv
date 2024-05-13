@@ -22,7 +22,7 @@ pipeline TreesPipeline {
  block BaumartDeutschDeleter oftype ColumnDeleter {
    delete: [column E];
  }
- 
+
  block TreesTableInterpreter oftype TableInterpreter { 
      header: true; 
      columns: [
@@ -48,12 +48,12 @@ pipeline TreesPipeline {
 
 
  
- valuetype stadtteilConstraint oftype text {
-    constraints: [ stadtteilFurth ];
+ valuetype StadtteilConstraint oftype text {
+    constraints: [ StadtteilFurth ];
  }
  
 
-constraint stadtteilFurth on text :
+constraint StadtteilFurth on text :
  value matches  /^Furth.*/;
 
 valuetype IdConstraint oftype text {
