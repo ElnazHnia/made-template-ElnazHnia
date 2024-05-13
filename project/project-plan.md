@@ -34,10 +34,10 @@ Short description of the DataSource.
 <!-- List of work packages ordered sequentially, each pointing to an issue with more details. -->
 
 1. Data Collection [#1][i1]
-2. Data Cleaning [#2][i2]
-3. Data Analyse [#3][i3]
+2. Data Preparation [#2][i2]
+3. Data Examination [#3][i3]
 4. Data Interpretation [#4][i4]
-5. Final Report [#5][i5]
+5. Final Report and summary [#5][i5]
 
 [i1]: https://github.com/ElnazHnia/made-template-ElnazHnia/issues/1
 [i2]: https://github.com/ElnazHnia/made-template-ElnazHnia/issues/2
