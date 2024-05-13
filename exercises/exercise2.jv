@@ -19,6 +19,10 @@ pipeline TreesPipeline {
     delimiter: ";";
  }
 
+ block BaumartDeutschDeleter oftype ColumnDeleter {
+   delete: [column E];
+ }
+ 
  block TreesTableInterpreter oftype TableInterpreter { 
      header: true; 
      columns: [
@@ -42,9 +46,7 @@ pipeline TreesPipeline {
      file: "./trees.sqlite";
  }
 
- block BaumartDeutschDeleter oftype ColumnDeleter {
-   delete: [column E];
- }
+
  
  valuetype stadtteilConstraint oftype text {
     constraints: [ stadtteilFurth ];
