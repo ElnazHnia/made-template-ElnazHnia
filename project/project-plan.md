@@ -7,27 +7,26 @@ Awesome MADE project.
 ## Main Question
 
 <!-- Think about one main question you want to answer based on the data. -->
-1. How have changes in forest cover impacted climate indicators like temperature in different countries from 2000 to 2022?
+1. How does public concern about climate change correlate with national greenhouse gas emission reduction targets across different countries?
 
 ## Description
 
-The aim of the "Climate Change Indicators" dataset is to track and analyze temperature variations across different countries over time, providing insights into global and regional climate change trends. The "Forest Shares" dataset, on the other hand, is designed to monitor changes in forest cover percentages over two decades, identifying trends in deforestation or reforestation. Both datasets are instrumental for environmental studies, helping to evaluate the impact of natural and human activities on climate and ecosystems, and to inform relevant conservation and sustainability policies.
+The aim of the files address a critical aspect of environmental policy and public engagement by examining whether a stronger public concern about climate change influences or is reflected in the ambitiousness of national policies aimed at reducing greenhouse gas emissions. It seeks to identify if there is a positive correlation where countries with higher levels of public concern also have more stringent emission reduction targets, or if discrepancies exist, indicating areas where public awareness could potentially be improved to support more aggressive climate action.
 
 ## Datasources
 
 <!-- Describe each datasources you plan to use in a section. Use the prefic "DatasourceX" where X is the id of the datasource. -->
 
-### Datasource1: Climate Change Indicators
-* Metadata URL: https://www.kaggle.com/datasets/tarunrm09/climate-change-indicators
-* Data URL: https://www.kaggle.com/datasets/tarunrm09/climate-change-indicators?elect=climate_change_indicators.csv
+### Datasource1: Climate change mitigation policies and measures (greenhouse gas emissions)
+* Metadata URL: https://data.europa.eu/data/datasets/data_climate-change-mitigation-policies-and-measures-1?locale=en
+* Data URL: https://www.eea.europa.eu/data-and-maps/data/climate-change-mitigation-policies-and-measures-1/pam-table/climate-change-mitigation-policies-and-3/download.csv
 * Data Type: CSV
-This dataset has climate change indicators for different countries with their associated codes(ISO2 AND ISO3). The measurement has been updated yearly till 2022 from 1961.
-### Datasource2: Deforestation
-* Metadata URL: https://www.kaggle.com/datasets/konradb/deforestation-dataset
-* Data URL: https://www.kaggle.com/datasets/konradb/deforestation-dataset?select=goal15.forest_shares.csv
+This file likely contains data on national targets for reducing greenhouse gas emissions, including specific goals set by countries as part of their commitments to international climate agreements like the Paris Accord. Analyzing this file can provide insights into the governmental response to climate change challenges.
+### Datasource2: International Climate Change Opinion Survey
+* Metadata URL: https://data.europa.eu/data/datasets/https-opendata-edf-fr-explore-dataset-enquete-dopinion-internationale-sur-le-changement-climatique-obscop-?locale=en
+* Data URL: https://opendata.edf.fr/api/explore/v2.1/catalog/datasets/enquete-dopinion-internationale-sur-le-changement-climatique-obscop/exports/csv
 * Data Type: CSV
-It aims to protect, restore and promote sustainable use of terrestrial ecosystems, sustainably manage forests, combat desertification, and halt and reverse land degradation and halt biodiversity loss
-Short description of the DataSource.
+This file is presumed to contain survey data reflecting public opinions and concerns regarding climate change across various countries. The data might include perceptions about the seriousness of climate issues, urgency for action, and personal impact assessments.
 
 ## Work Packages
 
