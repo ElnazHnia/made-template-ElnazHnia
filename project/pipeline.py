@@ -9,21 +9,31 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Setup the database connection
-database_url = os.getenv("DATABASE_URL", "sqlite:///my_climate_data.db")
-engine = create_engine(database_url)
+def engine_fun(fname):
+    dbname= f"sqlite:///{fname}.db"
+    database_url = os.getenv("DATABASE_URL", dbname)
+    engine = create_engine(database_url)
+    try:
+        # Use a context manager to ensure the connection is closed after use
+        with engine.connect() as connection:
+            # Use the text() function to ensure the SQL command is correctly interpreted
+            connection.execute(text("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);"))
+            # print("Table created successfully.")
+            return engine
+            # print("Current working directory:", os.getcwd())
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 # Function to drop a table if it exists
 def drop_table(table_name, engine):
     try:
         with engine.connect() as conn:
             conn.execute(text(f"DROP TABLE IF EXISTS {table_name};"))
-        logging.info(f"Table {table_name} has been dropped.")
+        # logging.info(f"Table {table_name} has been dropped.")
     except Exception as e:
         logging.error(f"Error dropping {table_name}: %s", e)
 
-# Example of how to drop the tables
-drop_table('climate_change_policies', engine)
-drop_table('climate_change_survey', engine)
+
 
 # Function to load data into SQL
 def load_data_to_sql(df, table_name, engine):
@@ -42,7 +52,10 @@ try:
     # Handle null values appropriately
     numeric_columns = df1.select_dtypes(include=['float64', 'int64']).columns
     df1[numeric_columns] = df1[numeric_columns].fillna(0)  # Or use another placeholder
-   
+    #  the database connection
+    engine1 = engine_fun('climate_change_policies')
+    # Example of how to drop the tables
+    drop_table('climate_change_policies', engine1)
     # Select useful columns
     df1 = df1[['Country:text', 'Name_of_policy_or_measure:text','Single_policy_or_measure__or_group_of_measures:text','Status_of_implementation_clean:text','Implementation_period_start_clean:text','Is_the_policy_or_measure_related_to_a_Union_policy__clean:text','GHG_s__affected:text']]
     # Rename them
@@ -56,7 +69,7 @@ try:
            'Is_the_policy_or_measure_related_to_a_Union_policy__clean:text': 'Is_the_policy_or_measure_related_to_a_Union_policy__clean',
            'GHG_s__affected:text': 'GHG_s__affected'
         })
-    df1.to_sql('climate_change_policies', con=engine, if_exists='replace', index=False)
+    df1.to_sql('climate_change_policies', con=engine1, if_exists='replace', index=False)
 except Exception as e:
     logging.error("Failed to process climate_change_policies: %s", e)
 
@@ -67,7 +80,10 @@ try:
         data = StringIO(response.text)
         # names=['Year', 'Country', 'Question','Reponse', 'Answer', 'Valeur','value']
         df2 = pd.read_csv(data, sep=';',  encoding='utf-8', low_memory=False)
-        
+         #  the database connection
+        engine2 = engine_fun('climate_change_survey')
+        # Example of how to drop the tables
+        drop_table('climate_change_survey', engine2)
         # Handle null values appropriately
         numeric_columns = df2.select_dtypes(include=['float64', 'int64']).columns
         df2[numeric_columns] = df2[numeric_columns].fillna(0)  # Or use another placeholder
@@ -85,7 +101,7 @@ try:
             'valeur': 'Valeur',
             'value': 'value'
             })
-        df2.to_sql('climate_change_survey', con=engine, if_exists='replace', index=False)
+        df2.to_sql('climate_change_survey', con=engine2, if_exists='replace', index=False)
     else:
         logging.error("Failed to download climate_change_survey: HTTP %s", response.status_code)
 except Exception as e:
@@ -94,9 +110,9 @@ except Exception as e:
 # Query the database and print results
 try:
     
-    result1 = pd.read_sql('SELECT * FROM climate_change_policies', con=engine)
-    print(result1.head())
-    result2 = pd.read_sql('SELECT * FROM climate_change_survey', con=engine)
-    print(result2.head())
+    result1 = pd.read_sql('SELECT * FROM climate_change_policies', con=engine1)
+    # print(result1.head())
+    result2 = pd.read_sql('SELECT * FROM climate_change_survey', con=engine2)
+    # print(result2.head())
 except Exception as e:
     logging.error("Error executing query: %s", e)
