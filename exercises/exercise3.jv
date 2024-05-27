@@ -15,11 +15,13 @@ pipeline GoodsPipeline {
  }
 //  Ensure German umlauts are saved correctly
  block GoodTextFileInterpreter oftype TextFileInterpreter {
-     encoding: "latin2";
+     encoding: "latin3";
+     
  }
 
  block GoodsCSVInterpreter oftype CSVInterpreter { 
     delimiter: ";";
+    enclosingEscape:'"'; 
  }
  //delete metadata
  block GoodsRowDeleter oftype RowDeleter {
@@ -79,6 +81,7 @@ valuetype PositiveNumConsrtraint oftype integer {
 
 constraint PositiveNum oftype RangeConstraint{
         lowerBound: 0;
+        lowerBoundInclusive:true;
 }
 
 //'month' must be a German month, capitalized
