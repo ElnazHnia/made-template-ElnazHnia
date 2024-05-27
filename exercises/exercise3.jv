@@ -4,9 +4,9 @@ pipeline GoodsPipeline {
     ->GoodTextFileInterpreter 
     ->GoodsCSVInterpreter 
     ->GoodsRowDeleter
-   //  ->GoodsColumnDeleter
+    ->GoodsColumnDeleter
     ->HeaderCell1Writer
-    ->HeaderCell2Writer
+    //->HeaderCell2Writer
     ->GoodsTableInterpreter
     ->GoodsLoader;
  
@@ -23,31 +23,28 @@ pipeline GoodsPipeline {
     delimiter: ";";
     enclosingEscape:'"'; 
  }
- //delete metadata  row 41337, 
+ //delete metadata   
  block GoodsRowDeleter oftype RowDeleter {
-   delete: [row 1, row 2, row 3, row 4, row 5, row 6, row 7,row 41338, row 41339];
+   delete: [row 1, row 2, row 3, row 4, row 5, row 6, row 7,row 41337,row 41338, row 41339];
  }
-   // delete ADDITIONAL columns
-// block GoodsColumnDeleter oftype ColumnDeleter {
-// 	delete: 
-//       [column F, column G, column H, column I, column J, column K, column L, column M, column N, column O, column P, column Q, column R, column S, column T, column U, column V, column W, column X, column Y, column Z, 
-//       column AA, column AB, column AC, column AD, column AE, column AF, column AG, column AH, column AI, column AJ, column AK, column AL, column AM, column AN, column AO, column AP, column AQ, column AR, column AS
-//       ];    
-// }
-// , column AV, column AW, column AX, column AY, column AZ, 
-//       column BA, column BB, column BC, column BD, column BE, column BF, column BG, column BH, column BI, column BJ, column BK, column BL, column BM, column BN, column BO, column BP, column BQ, column BR, column BS, column BT, column BU, column BV, column BW, column BX, column BY, column BZ, 
-//       column CA, column CB, column CC, column CD, column CE,
-// "year", "month","goods_id", "goods_name","goods_source","abroad", "total"
+ // delete ADDITIONAL columns
+block GoodsColumnDeleter oftype ColumnDeleter {
+	delete: 
+      [column F, column G, column H, column I, column J, column K, column L, column M, column N, column O, column P, column Q, column R, column S, column T, column U, column V, column W, column X, column Y, column Z, 
+      column AA, column AB, column AC, column AD, column AE, column AF, column AG, column AH, column AI, column AJ, column AK, column AL, column AM, column AN, column AO, column AP, column AQ, column AR, column AS
+      ];    
+}
+// rename columns
 block HeaderCell1Writer oftype CellWriter {
-   at: range A1:E1;
-   write: ["year","month","goods_id", "goods_name","goods_source"];
+   at: range A1:G1;
+   write: ["year","month","goods_id", "goods_name","goods_source","abroad", "total"];
    
 }
-block HeaderCell2Writer oftype CellWriter {
-    at: range AT1:AU1;
-   write: ["abroad", "total"];
+// block HeaderCell2Writer oftype CellWriter {
+//     at: range AT1:AU1;
+//    write: ["abroad", "total"];
    
-}
+// }
  block GoodsTableInterpreter oftype TableInterpreter { 
      header: true; 
      columns: [
