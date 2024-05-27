@@ -1,0 +1,103 @@
+          
+pipeline GoodsPipeline {
+  GoodsExtractor
+    ->GoodTextFileInterpreter 
+    ->GoodsCSVInterpreter 
+    ->GoodsRowDeleter
+    ->GoodsColumnDeleter
+    ->HeaderCell1Writer
+   //  ->HeaderCell2Writer
+    ->GoodsTableInterpreter
+    ->GoodsLoader;
+ 
+ block GoodsExtractor oftype HttpExtractor {
+    url:"https://www-genesis.destatis.de/genesis/downloads/00/tables/46131-0014_00.csv";
+ }
+//  Ensure German umlauts are saved correctly
+ block GoodTextFileInterpreter oftype TextFileInterpreter {
+     encoding: "latin2";
+ }
+
+ block GoodsCSVInterpreter oftype CSVInterpreter { 
+    delimiter: ";";
+ }
+ //delete metadata
+ block GoodsRowDeleter oftype RowDeleter {
+   delete: [row 1, row 2, row 3, row 4, row 5, row 6, row 7, row 8, row 41337, row 41338, row 41339];
+ }
+   // delete ADDITIONAL columns
+block GoodsColumnDeleter oftype ColumnDeleter {
+	delete: 
+      [column F, column G, column H, column I, column J, column K, column L, column M, column N, column O, column P, column Q, column R, column S, column T, column U, column V, column W, column X, column Y, column Z, 
+      column AA, column AB, column AC, column AD, column AE, column AF, column AG, column AH, column AI, column AJ, column AK, column AL, column AM, column AN, column AO, column AP, column AQ, column AR, column AS
+      ];    
+}
+// , column AV, column AW, column AX, column AY, column AZ, 
+//       column BA, column BB, column BC, column BD, column BE, column BF, column BG, column BH, column BI, column BJ, column BK, column BL, column BM, column BN, column BO, column BP, column BQ, column BR, column BS, column BT, column BU, column BV, column BW, column BX, column BY, column BZ, 
+//       column CA, column CB, column CC, column CD, column CE,
+// "year", "month","goods_id", "goods_name","goods_source","abroad", "total"
+block HeaderCell1Writer oftype CellWriter {
+   at: range A1:G1;
+   write: ["year","month","goods_id", "goods_name","goods_source","abroad", "total"];
+   
+}
+// block HeaderCell2Writer oftype CellWriter {
+//    at: cell B1;
+//    write: ["month"];
+   
+// }
+ block GoodsTableInterpreter oftype TableInterpreter { 
+     header: true; 
+     columns: [
+     
+          
+                "year" oftype PositiveNumConsrtraint,
+                "month" oftype MonthCapitalConsrtraint,
+                "goods_id" oftype GoodsIdConstraint,
+                "goods_name" oftype text,
+                "goods_source" oftype text,
+                "abroad" oftype PositiveNumConsrtraint,
+                "total" oftype PositiveNumConsrtraint
+                
+
+              ];
+     
+  
+ }
+ block GoodsLoader oftype SQLiteLoader { 
+    table: "goods";
+     file: "./goodsTransportedByTrain.sqlite";
+ }
+
+
+//  constaints part:
+
+//positive integer
+valuetype PositiveNumConsrtraint oftype integer {
+   constraints: [PositiveNum];
+}
+
+constraint PositiveNum oftype RangeConstraint{
+        lowerBound: 0;
+}
+
+//'month' must be a German month, capitalized
+valuetype MonthCapitalConsrtraint oftype text {
+   constraints: [MonthConsrtraint];
+}
+constraint MonthConsrtraint oftype AllowlistConstraint {
+   allowlist: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+}
+
+//'goods_id' must start with NST7-, followed by three numbers or capital letters
+valuetype GoodsIdConstraint oftype text {
+    constraints: [ GoodsIdNST7 ];
+}
+constraint GoodsIdNST7 oftype RegexConstraint {
+   regex: /^NST7-[A-Z0-9]{3}$/;
+}
+ 
+  
+}
+  
+
