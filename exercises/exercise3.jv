@@ -6,7 +6,7 @@ pipeline GoodsPipeline {
     ->GoodsRowDeleter
    //  ->GoodsColumnDeleter
     ->HeaderCell1Writer
-   //  ->HeaderCell2Writer
+    ->HeaderCell2Writer
     ->GoodsTableInterpreter
     ->GoodsLoader;
  
@@ -39,15 +39,15 @@ pipeline GoodsPipeline {
 //       column CA, column CB, column CC, column CD, column CE,
 // "year", "month","goods_id", "goods_name","goods_source","abroad", "total"
 block HeaderCell1Writer oftype CellWriter {
-   at: range A1:G1;
-   write: ["year","month","goods_id", "goods_name","goods_source","abroad", "total"];
+   at: range A1:E1;
+   write: ["year","month","goods_id", "goods_name","goods_source"];
    
 }
-// block HeaderCell2Writer oftype CellWriter {
-//    at: cell B1;
-//    write: ["month"];
+block HeaderCell2Writer oftype CellWriter {
+    at: range AT1:AU1;
+   write: ["abroad", "total"];
    
-// }
+}
  block GoodsTableInterpreter oftype TableInterpreter { 
      header: true; 
      columns: [
