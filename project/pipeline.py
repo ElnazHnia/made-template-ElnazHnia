@@ -1,118 +1,95 @@
 import requests
 from io import StringIO
-from sqlalchemy import create_engine, text
 import pandas as pd
-import os
 import logging
+import sqlite3
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Setup the database connection
-def engine_fun(fname):
-    dbname= f"sqlite:///{fname}.db"
-    database_url = os.getenv("DATABASE_URL", dbname)
-    engine = create_engine(database_url)
+def create_connection(fname):
+    """Create and return a database connection to a single SQLite database."""
+    db_path = f"{fname}.db"
     try:
-        # Use a context manager to ensure the connection is closed after use
-        with engine.connect() as connection:
-            # Use the text() function to ensure the SQL command is correctly interpreted
-            connection.execute(text("CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);"))
-            # print("Table created successfully.")
-            return engine
-            # print("Current working directory:", os.getcwd())
+        conn = sqlite3.connect(db_path)
+        logging.info(f"Database connected successfully at {db_path}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"Failed to connect to the database: {e}")
+        return None
+    return conn
 
-# Function to drop a table if it exists
-def drop_table(table_name, engine):
-    try:
-        with engine.connect() as conn:
-            conn.execute(text(f"DROP TABLE IF EXISTS {table_name};"))
-        # logging.info(f"Table {table_name} has been dropped.")
-    except Exception as e:
-        logging.error(f"Error dropping {table_name}: %s", e)
-
-
-
-# Function to load data into SQL
-def load_data_to_sql(df, table_name, engine):
-    try:
-        df.to_sql(table_name, con=engine, if_exists='replace', index=False)
-        logging.info(f"Data loaded successfully into {table_name}.")
-    except Exception as e:
-        logging.error(f"Error loading data into {table_name}: %s", e)
-
-# Download and process first CSV file: climate_change_policies
-try:
-    
-    df1 = pd.read_csv('https://www.eea.europa.eu/data-and-maps/data/climate-change-mitigation-policies-and-measures-1/pam-table/climate-change-mitigation-policies-and-3/download.csv', 
-                       sep=',', encoding='utf-8')
-    
-    # Handle null values appropriately
-    numeric_columns = df1.select_dtypes(include=['float64', 'int64']).columns
-    df1[numeric_columns] = df1[numeric_columns].fillna(0)  # Or use another placeholder
-    #  the database connection
-    engine1 = engine_fun('climate_change_policies')
-    # Example of how to drop the tables
-    drop_table('climate_change_policies', engine1)
-    # Select useful columns
-    df1 = df1[['Country:text', 'Name_of_policy_or_measure:text','Single_policy_or_measure__or_group_of_measures:text','Status_of_implementation_clean:text','Implementation_period_start_clean:text','Is_the_policy_or_measure_related_to_a_Union_policy__clean:text','GHG_s__affected:text']]
-    # Rename them
-    if {'Country:text', 'Name_of_policy_or_measure:text','Single_policy_or_measure__or_group_of_measures:text','Status_of_implementation_clean:text','Implementation_period_start_clean:text','Is_the_policy_or_measure_related_to_a_Union_policy__clean:text','GHG_s__affected:text'}.issubset(df1.columns):
-        df1 = df1.rename(columns={
-           'Country:text' : 'Country', 
-           'Name_of_policy_or_measure:text': 'Name_of_policy_or_measure',
-           'Single_policy_or_measure__or_group_of_measures:text': 'Single_policy_or_measure__or_group_of_measures',
-           'Status_of_implementation_clean:text': 'Status',
-           'Implementation_period_start_clean:text': 'start_clean',
-           'Is_the_policy_or_measure_related_to_a_Union_policy__clean:text': 'Is_the_policy_or_measure_related_to_a_Union_policy__clean',
-           'GHG_s__affected:text': 'GHG_s__affected'
-        })
-    df1.to_sql('climate_change_policies', con=engine1, if_exists='replace', index=False)
-except Exception as e:
-    logging.error("Failed to process climate_change_policies: %s", e)
-
-# Download and process second CSV file: climate_change_survey
-try:
-    response = requests.get('https://opendata.edf.fr/api/explore/v2.1/catalog/datasets/enquete-dopinion-internationale-sur-le-changement-climatique-obscop/exports/csv')
-    if response.status_code == 200:
+def download_and_process_data(url,sep, encoding='utf-8', low_memory=False):
+    """Download and process CSV data from a URL."""
+    response = requests.get(url)
+    if response.status_code == 200: # The request was successfully received, understood, and processed by the server
         data = StringIO(response.text)
-        # names=['Year', 'Country', 'Question','Reponse', 'Answer', 'Valeur','value']
-        df2 = pd.read_csv(data, sep=';',  encoding='utf-8', low_memory=False)
-         #  the database connection
-        engine2 = engine_fun('climate_change_survey')
-        # Example of how to drop the tables
-        drop_table('climate_change_survey', engine2)
+        df = pd.read_csv(data, sep=sep, encoding=encoding, low_memory=low_memory)
         # Handle null values appropriately
-        numeric_columns = df2.select_dtypes(include=['float64', 'int64']).columns
-        df2[numeric_columns] = df2[numeric_columns].fillna(0)  # Or use another placeholder
-        df2.fillna('Default Value', inplace=True)
-        # Select useful columns
-        df2 = df2[['annee','population',  'details_of_the_question', 'reponse', 'answer', 'valeur', 'value']]
-        # Rename them
-        if {'annee','population',  'details_of_the_question', 'reponse', 'answer', 'valeur', 'value'}.issubset(df2.columns):
-            df2 = df2.rename(columns={
-            'annee' : 'Year', 
-            'population': 'Country',
-            'details_of_the_question': 'Question',
-            'reponse': 'Reponse',
-            'answer': 'Answer',
-            'valeur': 'Valeur',
-            'value': 'value'
-            })
-        df2.to_sql('climate_change_survey', con=engine2, if_exists='replace', index=False)
+        numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+        df[numeric_columns] = df[numeric_columns].fillna(0)  # Or use another placeholder
+        df.fillna('Default Value', inplace=True)
+        return df
     else:
-        logging.error("Failed to download climate_change_survey: HTTP %s", response.status_code)
-except Exception as e:
-    logging.error("Failed to process climate_change_survey: %s", e)
+        logging.error(f"Failed to download data: HTTP {response.status_code}")
+        return None
 
-# Query the database and print results
-try:
-    
-    result1 = pd.read_sql('SELECT * FROM climate_change_policies', con=engine1)
-    # print(result1.head())
-    result2 = pd.read_sql('SELECT * FROM climate_change_survey', con=engine2)
-    # print(result2.head())
-except Exception as e:
-    logging.error("Error executing query: %s", e)
+def process_data(df, table_name,dbname, column_mapping):
+    """Create table, and load data into the specified table within the database.
+    Optionally, manipulate the DataFrame columns based on `column_mapping`."""
+    conn = create_connection(dbname)
+    if conn and df is not None:
+        try:
+         
+            # Rename columns based on provided mapping
+            if column_mapping:
+                df = df.rename(columns=column_mapping)  
+          
+            # Retain only the columns that have been renamed
+            columns_to_keep = list(column_mapping.values())
+            df = df[columns_to_keep]
+
+            if df.columns.duplicated().any():
+               logging.error("Duplicate column names found after renaming: Please check the column mapping.")
+               return  # Add this to prevent attempting to load into SQL with duplicate columns
+            
+            # Load data
+            df.to_sql(table_name, conn, if_exists='replace', index=False)
+            conn.commit()
+            logging.info(f"Data loaded successfully into {table_name}.")
+        except Exception as e:
+            logging.error(f"Failed to process data for {table_name}: {e}")
+        finally:
+            conn.close()
+    else:
+        logging.error("Failed to setup database or download data.")
+
+
+# Process and load first dataset
+url1 = 'https://www.eea.europa.eu/data-and-maps/data/climate-change-mitigation-policies-and-measures-1/pam-table/climate-change-mitigation-policies-and-3/download.csv'
+df1 = download_and_process_data(url1, ',', encoding='utf-8')
+if df1 is not None:
+    column_mapping1 = {
+        'Country:text' : 'Country', 
+        'Name_of_policy_or_measure:text': 'Name_of_policy_or_measure',
+        'Single_policy_or_measure__or_group_of_measures:text': 'Single_policy_or_measure__or_group_of_measures',
+        'Status_of_implementation_clean:text': 'Status',
+        'Implementation_period_start_clean:text': 'start_clean',
+        'Is_the_policy_or_measure_related_to_a_Union_policy__clean:text': 'Is_the_policy_or_measure_related_to_a_Union_policy__clean',
+        'GHG_s__affected:text': 'GHG_s__affected'
+    }
+    process_data(df1, 'climate_change_policies','climate_change_policies', column_mapping1)
+
+# Process and load second dataset
+url2 = 'https://opendata.edf.fr/api/explore/v2.1/catalog/datasets/enquete-dopinion-internationale-sur-le-changement-climatique-obscop/exports/csv'
+df2 = download_and_process_data(url2,';', encoding='utf-8')
+if df2 is not None:
+    column_mapping2 = {
+        'annee' : 'Year', 
+        'population': 'Country',
+        'details_of_the_question': 'Question in Detail',
+        'reponse': 'Reponse',
+        'answer': 'Answer',
+        'valeur': 'Valeur',
+        'value': 'value'
+    }
+    process_data(df2, 'climate_change_survey','climate_change_survey', column_mapping2)
