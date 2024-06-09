@@ -1,0 +1,110 @@
+          
+pipeline TemperaturesPipeline {
+ TemperaturesExtractor
+    ->ZipArchiveInterpreter
+    ->TemperaturesFilePicker 
+    ->TemperaturesTextFileInterpreter
+    ->TemperaturesCSVInterpreter 
+    ->GeraetAktivCellRangeSelector 
+    ->TemperaturesColumnDeleter
+    ->HeaderCell1Writer
+    ->TemperaturesTableInterpreter
+    ->TemperatureCelsiusToFahrenheitTransformer
+    ->BatteryTemperatureCelsiusToFahrenheitTransformer
+    ->TemperaturesLoader;
+ 
+ 
+ block TemperaturesExtractor oftype HttpExtractor {
+    url:"https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip";
+ }
+ block ZipArchiveInterpreter oftype ArchiveInterpreter {
+   archiveType: "zip";
+ }
+//  Ensure German umlauts are saved correctly
+ block TemperaturesFilePicker oftype FilePicker {
+     path: "/data.csv";
+ }
+ block TemperaturesTextFileInterpreter oftype TextFileInterpreter {
+
+ }
+ block TemperaturesCSVInterpreter oftype CSVInterpreter { 
+    delimiter: ";";
+ }
+
+// delete columns after column 10
+block GeraetAktivCellRangeSelector oftype CellRangeSelector {
+        select: range A1:J*;
+}
+ // delete ADDITIONAL columns between columns
+block TemperaturesColumnDeleter oftype ColumnDeleter {
+	delete: 
+      [column F, column G, column H, column I];    
+}
+// rename columns
+block HeaderCell1Writer oftype CellWriter {
+   at: range A1:F1;
+   write: ["id","producer","model", "month","temperature","battery_temperature"];
+   
+}
+
+block TemperaturesTableInterpreter oftype TableInterpreter { 
+     header: true; 
+     columns: [
+     
+          
+                "id" oftype PositiveId,
+                "producer" oftype text,
+                "model" oftype text,
+                "month" oftype MonthLimiation,
+                "temperature" oftype decimal,
+                "battery_temperature" oftype decimal
+              ];
+     
+  
+}
+block TemperaturesLoader oftype SQLiteLoader { 
+    table: "temperatures";
+     file: "./temperatures.sqlite";
+}
+//Transform temperatures in Celsius to Fahrenheit
+transform CelsiusToFahrenheit {
+   from Celsius oftype decimal;
+   to Fahrenheit oftype decimal;
+   Fahrenheit: (Celsius * 9/5) + 32;
+}
+block TemperatureCelsiusToFahrenheitTransformer oftype TableTransformer {
+   inputColumns: ['temperature'];
+   outputColumn: 'temperature';
+   use: CelsiusToFahrenheit;
+}
+block BatteryTemperatureCelsiusToFahrenheitTransformer oftype TableTransformer {
+   inputColumns: ['battery_temperature'];
+   outputColumn: 'battery_temperature';
+   use: CelsiusToFahrenheit;
+} 
+//constarints
+
+//  Id must be over zero
+valuetype PositiveId oftype integer {
+        constraints: [ PositiveIdConstraint ];
+}
+
+constraint PositiveIdConstraint on integer:
+   value > 0;
+
+valuetype MonthLimiation oftype integer {
+   constraints: [ MonthLimiationConstraint ];
+}
+
+constraint MonthLimiationConstraint oftype RangeConstraint {
+        lowerBound: 1;
+        lowerBoundInclusive: true;
+        upperBound: 12;
+        upperBoundInclusive: true;
+}
+
+ 
+  
+}
+  
+
