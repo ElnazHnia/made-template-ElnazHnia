@@ -3,3 +3,5 @@ requests
 sqlite3
 matplotlib
 seaborn
+pytest
+numpy
