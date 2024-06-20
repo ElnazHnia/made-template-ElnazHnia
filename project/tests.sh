@@ -6,7 +6,7 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "Running data processing and statistical analysis..."
+echo "Running tests..."
 
-# Run the Python script
-python tests.py
+# Run the tests
+pytest project/tests.py
