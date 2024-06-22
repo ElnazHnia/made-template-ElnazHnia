@@ -3,7 +3,9 @@ name: CI
 on:
   push:
     branches:
-      - main
+     - main
+    paths:
+      - project/**
 
 jobs:
   build:
@@ -11,12 +13,13 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v3
+      
+     # Install Python 3.12.0
+    - name: Set up Python version 3.12.0
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.x'  # specify your required Python version
+        python-version: 3.12.0
 
     - name: Install dependencies
       run: |
@@ -25,10 +28,4 @@ jobs:
 
     - name: Run tests
       run: |
-        chmod +x project/tests.sh
-        bash project/tests.sh
-
-    - name: Run pipeline
-      run: |
-        chmod +x project/pipeline.sh
-        bash project/pipeline.sh
+        chmod +x ./project/tests.sh && ./project/tests.sh
