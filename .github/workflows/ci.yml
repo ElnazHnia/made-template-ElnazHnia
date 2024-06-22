@@ -1,47 +1,50 @@
 name: CI
 
-
 on:
   push:
     branches:
       - main
+    paths:
+      - project/**
 
 jobs:
-  execute-pipeline:
+  Project-feedback:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v3
         with:
-          python-version: '3.8'
+          path: main
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r ./project/requirements.txt 
-          pip install pytest
+      - name: Checkout Project feedback
+        uses: actions/checkout@v3
+        with:
+          repository: jvalue/made-Project-feedback
+          path: grading
 
-      - name: Set execute permissions and run pipeline
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "lts/*"
+
+      # Install python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # Run grading feedback
+      - name: Project feedback
+        id: ex_feedback
         run: |
-          cd project
-          chmod +x pipeline.sh
-          ./pipeline.sh
-       
-          
-      - name: Set execute permissions and run tests
-        run: |
-          cd project
-          chmod +x tests.sh
           ./tests.sh
-       
 
-      # store output files in the data folder
-      - name: Upload output files
-        uses: actions/upload-artifact@v2
+      # Create badges
+      - name: Create badges Project 5
+        uses: RubbaBoy/BYOB@v1.3.0
         with:
-          name: output-files
-          path: ./data/*.sqlite
+          NAME: score_project5
+          LABEL: "project5"
+          STATUS: ${{ steps.ex_feedback.outputs.score_project5 }}
+          COLOR: 84714F
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
