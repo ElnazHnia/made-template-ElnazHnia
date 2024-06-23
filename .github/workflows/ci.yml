@@ -25,12 +25,6 @@ jobs:
           pip install -r project/requirements.txt
           pip install pytest
 
-      - name: Set execute permissions and run pipeline
-        run: |
-          cd project
-          chmod +x pipeline.sh
-          ./pipeline.sh
-
       # Debugging output
       - name: Check current directory and list files after pipeline
         run: |
