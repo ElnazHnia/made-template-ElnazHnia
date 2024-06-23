@@ -1,6 +1,5 @@
 pandas
 requests
-sqlite3
 matplotlib
 seaborn
 pytest
