@@ -37,11 +37,11 @@ jobs:
           pwd
           ls -la
 
+  
       - name: Set execute permissions and run tests
         run: |
-          cd project
-          chmod +x tests.sh
-          ./tests.sh
+          chmod +x project/tests.sh
+          ./project/tests.sh
 
       # Debugging output
       - name: Check current directory and list files after tests
