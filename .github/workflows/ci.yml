@@ -1,4 +1,4 @@
-name: Run Pipeline on Push
+name: CI
 
 on:
   push:
@@ -37,21 +37,11 @@ jobs:
           pwd
           ls -la
 
-  
       - name: Set execute permissions and run tests
         run: |
           chmod +x project/tests.sh
           ./project/tests.sh
 
-      # Debugging output
-      - name: Check current directory and list files after tests
-        run: |
-          pwd
-          ls -la
+    
 
-      # Store output files in the data folder
-      - name: Upload output files
-        uses: actions/upload-artifact@v2
-        with:
-          name: output-files
-          path: data/*.sqlite
+   
