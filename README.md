@@ -1,6 +1,6 @@
 # Project
 # "Public Concern vs. Emission Targets"
-The aim of the files address the relationship between public concern about climate change and the rigor of national emission reduction policies. The goal is to determine if higher public concern correlates with stricter policies, or if discrepancies suggest areas for increasing public awareness to support more robust climate action.
+The aim of the project is to understand the relationship between public concern about climate change and the rigor of national emission reduction policies. The goal is to determine if higher public concern correlates with stricter policies, or if discrepancies suggest areas for increasing public awareness to support more robust climate action.
 # Exercise Badges
 
 ![](https://byob.yarr.is/ElnazHnia/made-template-ElnazHnia/score_ex1) ![](https://byob.yarr.is/ElnazHnia/made-template-ElnazHnia/score_ex2) ![](https://byob.yarr.is/ElnazHnia/made-template-ElnazHnia/score_ex3) ![](https://byob.yarr.is/ElnazHnia/made-template-ElnazHnia/score_ex4) ![](https://byob.yarr.is/ElnazHnia/made-template-ElnazHnia/score_ex5)
